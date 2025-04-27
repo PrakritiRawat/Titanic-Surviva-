@@ -1,128 +1,93 @@
-🐳 Streamlit & PostgreSQL Dashboard in Docker 🐘📊
+# 🚢 **Titanic Survival Predictor: Containerized Streamlit App**
 
-  
+**View the source code on GitHub:** [https://github.com/PrakritiRawat/Titanic-Surviva-.git](https://github.com/PrakritiRawat/Titanic-Surviva-.git)
 
-📌 Overview
+---
 
-Deploy a Streamlit application that connects to a PostgreSQL database, fully containerized with Docker. This end-to-end solution covers:
+## 📌 **Overview**
+The **Titanic Survival Prediction Model** is a machine learning application that predicts whether a passenger would have survived the Titanic disaster based on various input features. Built with **Python**, **scikit-learn**, **pandas**, and **Streamlit**, this containerized app ensures seamless deployment and portability via **Docker**.
 
-Securely running PostgreSQL in a Docker container
+**LIVE DEMO:** http://localhost:8501/
 
-Configuring a custom Docker network for inter-container communication
+---
 
-Building and deploying a Streamlit dashboard in Docker
+## 📂 **Project Structure**
+```bash
+Titanic-Prediction-Model/
+│── Dockerfile
+│── requirements.txt
+│── main.py
+│── titanic_model.py
+│── titanic_model.pkl
+```
 
-Displaying and filtering passenger data from PostgreSQL
+### **File Descriptions**
+- **`main.py`** – Streamlit web interface for user inputs and predictions.
+- **`titanic_model.py`** – Script to train and serialize the Random Forest model.
+- **`titanic_model.pkl`** – Serialized machine learning model.
+- **`requirements.txt`** – Application dependencies.
+- **`Dockerfile`** – Container specification for the Streamlit app.
 
-🚀 Features
+---
 
-🔗 Inter-container Networking: Custom Docker network to link Streamlit and PostgreSQL containers
+## 🤖 **Model Training (`titanic_model.py`)**
+1. Load and preprocess the Titanic dataset.
+2. Train a **Random Forest Classifier**.
+3. Serialize the trained model to `titanic_model.pkl` using `joblib`.
 
-🐘 PostgreSQL Backend: Containerized, persistent database for passenger data
+---
 
-📈 Streamlit UI: Real-time data visualization and filtering of passenger records
+## 🎨 **Streamlit Application (`main.py`)**
+Interactive UI features:
+- Enhanced CSS styling.
+- Live prediction from the `.pkl` model.
+- Input controls: sliders, dropdowns, text fields.
 
-📂 Easy Setup: Single-network setup, minimal commands, developer-friendly
+---
 
-🛠️ Prerequisites
+## 🐳 **Docker Setup**
+**`Dockerfile`**:
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY main.py titanic_model.pkl ./
+EXPOSE 8501
+CMD ["streamlit", "run", "main.py", "--server.port=8501", "--server.address=0.0.0.0"]
+```
 
-Docker (>=20.10) & Docker Compose (optional) 🐳
+---
 
-Python 3.9+ (for local testing) 🐍
+## 🚀 **Running with Docker**
+1️⃣ **Build the image**:
+```bash
+docker build -t titanic-prediction .
+```
 
-Basic familiarity with command-line interfaces
+2️⃣ **Run the container**:
+```bash
+docker run -d -p 8501:8501 --name titanic_app titanic-prediction
+```
 
-📁 Repository Structure
+3️⃣ **Access the app**:
+```
+http://localhost:8501
+```
 
-Streamlit-Postgres-Docker/
-├── Dockerfile              # Streamlit app container definition
-├── main.py                 # Streamlit application code
-└── students.csv            # Sample data for local testing (optional)
+---
 
-⚙️ Setup Steps
+## 🎯 **Conclusion**
+- Containerized ML app with **Streamlit** and **Docker**.
+- Predicts Titanic survival based on user inputs.
+- Easily deployable via Docker CLI or orchestration.
 
-1️⃣ Create a Docker Network
+**Next Steps:**
+- Deploy on AWS/GCP
+- Enhance UI
+- Improve model with additional features
 
-docker network create my_postgres_network
+---
 
-Enables Streamlit and PostgreSQL containers to communicate by name.
-
-2️⃣ Launch PostgreSQL Container
-
-docker run -d \
-  --name postgres-db \
-  --network my_postgres_network \
-  -e POSTGRES_USER=appuser \
-  -e POSTGRES_PASSWORD=s3cr3t \
-  -e POSTGRES_DB=passengerdb \
-  -v pgdata:/var/lib/postgresql/data \
-  postgres:13
-
-Volume pgdata ensures data persists across restarts.
-
-3️⃣ Initialize Database Schema
-
-docker exec -it postgres-db psql -U appuser -d passengerdb <<EOF
-CREATE TABLE passengers (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100),
-  location VARCHAR(100)
-);
-INSERT INTO passengers (name, location) VALUES
-  ('Alice','New York'),
-  ('Bob','Los Angeles'),
-  ('Charlie','Chicago');
-EOF
-
-4️⃣ Build the Streamlit App Image
-
-docker build -t streamlit-dashboard .
-
-Your Dockerfile installs dependencies (streamlit, psycopg2-binary) and copies main.py.
-
-5️⃣ Run the Streamlit Container
-
-docker run -d \
-  --name streamlit-app \
-  --network my_postgres_network \
-  -p 8501:8501 \
-  streamlit-dashboard
-
-🌐 Access the Dashboard
-
-Open your browser at:👉 http://localhost:8501/
-
-You’ll see a live list of passengers fetched directly from your PostgreSQL database.
-
-📝 main.py (Key Highlights)
-
-import streamlit as st
-import psycopg2
-import pandas as pd
-
-# Database connection settings
-db_config = {
-    'host': 'postgres-db',
-    'port': 5432,
-    'dbname': 'passengerdb',
-    'user': 'appuser',
-    'password': 's3cr3t'
-}
-
-# Connect and fetch data
-def load_data():
-    conn = psycopg2.connect(**db_config)
-    df = pd.read_sql('SELECT * FROM passengers', conn)
-    conn.close()
-    return df
-
-st.title("🛫 Passenger Dashboard")
-
-df = load_data()
-st.write(df)
-
-min_loc = st.text_input("Filter by location:")
-if min_loc:
-    st.write(df[df['location'].str.contains(min_loc, case=False)])
-
+**Happy sailing through data!** 🐳🚢
 
